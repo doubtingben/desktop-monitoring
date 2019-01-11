@@ -1,4 +1,6 @@
 provider "grafana" {
+  url ="http://localhost:8082"
+  auth = "admin:secret"
 }
 
 resource "grafana_data_source" "prometheus" {
@@ -9,4 +11,5 @@ resource "grafana_data_source" "prometheus" {
 
 resource "grafana_dashboard" "node-exporter-output" {
   config_json = "${file("node-exporter-output.json")}"
+  depends_on = ["prometheus"]
 }
