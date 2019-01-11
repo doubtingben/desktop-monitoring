@@ -1,0 +1,47 @@
+version: '2'
+
+services:    
+  cadvisor:
+    image: google/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+
+  node-exporter:
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /etc/hostname:/etc/host_hostname
+    command: |
+      --path.procfs /host/proc
+      --path.sysfs /host/sys
+      --collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($$|/)"
+      --collector.wifi
+      --collector.tcpstat
+      --collector.systemd
+      --collector.processes
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 8081:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-storage:/prometheus
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 8082:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  grafana-storage:
+  prometheus-storage:
